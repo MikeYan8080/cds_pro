@@ -3,7 +3,7 @@ import numpy as np
 from scipy.optimize import fsolve
 from matplotlib import pyplot as plt
 
-# treasury rate data from U.S. DEPARTMENT OF THE TREASURY
+# treasury rate data from U.S. DEPARTMENT OF THE TREASURY website
 treasury_yield_curve = [0.79, 0.64, 0.45, 0.41, 0.39, 0.49, 0.53, 0.58, 0.69, 0.74, 1.09, 1.25]
 treasury_yield_curve = [x/100 for x in treasury_yield_curve]
 tyc_date = ['1 Mo',	'2 Mo', '3 Mo',	'6 Mo', '1 Yr',	'2 Yr',	'3 Yr',	'5 Yr',	'7 Yr',	'10 Yr', '20 Yr', '30 Yr']
