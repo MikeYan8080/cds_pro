@@ -49,7 +49,7 @@ data2['Date'] = data1['Date']
 
 
 selected_data = pd.read_excel(r'C:\Users\严书航\Desktop\data.xlsx')
-Required_data = selected_data.groupby(by='Date').count()
+# Required_data = selected_data.groupby(by='Date').count()
 date = selected_data['Date'].unique()
 date = pd.Series(date, name='Date').sort_values(ascending=False)
 

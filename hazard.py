@@ -25,7 +25,7 @@ years_of_spread =['Spread6m', 'Spread1y', 'Spread2y','Spread3y', 'Spread4y', 'Sp
 # data5[list(range(120))] = data5[list(range(120))] .applymap(lambda x: np.round(x, 3))
 # data5.to_excel(r'C:\Users\严书航\Desktop\test2.xlsx')
 
-data5 = pd.read_sql_table(table_name='combine', con=engine)
+data5 = pd.read_sql_table(table_name='zcombine', con=engine)
 data5.drop(columns='index', inplace=True)
 
 # data5 = data5[0:6540]  # 2018
@@ -41,7 +41,7 @@ data5.drop(columns='index', inplace=True)
 # data5 = data5[75182:82364]  # 2008
 # data5 = data5[82364:89817]  # 2007
 # data5 = data5[89817:96655]  # 2006
-data5 = data5[96655:]  # 2005
+data5 = data5[0:111]  # 2015-2018 zhazard1
 
 
 
@@ -98,7 +98,7 @@ def find_hazard(x):
             return sum
 
         # use fsolve function to solve the hazard rate
-        r = fsolve(func, x0=0, xtol=0.00001)
+        r = fsolve(func, x0=0, xtol=0.000001)
         lamm[x] = r
 
     hazard_rate = pd.Series(lamm, index=cds_date)
@@ -127,7 +127,7 @@ data6.rename(columns=change, inplace=True)
 
 # data6.to_csv(r'C:\Users\严书航\Desktop\hazard.csv')
 
-data6.to_sql(name='hazard2005', con=engine, if_exists='replace')
+data6.to_sql(name='zhazard1', con=engine, if_exists='replace')
 # data6.info()
 
 print('Cost ', dt.now() - start)
