@@ -1,3 +1,6 @@
+# its a demo to prove that our function is right, same as the paper.
+
+
 import pandas as pd
 import numpy as np
 from scipy.optimize import fsolve
@@ -48,19 +51,6 @@ def discout_factor(ltcy):
 
 df = discout_factor(ltcy)
 
-
-# tyc = pd.DataFrame({'yield': treasury_yield_curve, 'date': tyc_date})
-# tyc.set_index(tyc.date, inplace=True)
-# tyc.drop(columns='date', inplace=True)
-
-
-# input the csd data
-
-# credit_default_spread = [0.40,	0.56, 0.76,	0.97, 1.03,	1.10, 1.16,	1.34, 1.36,	1.38]
-# cds_rate = [x/100 for x in credit_default_spread]
-# cds_date = ['Spread1y',	'Spread2y',	'Spread3y',	'Spread4y',	'Spread5y',	'Spread7y',	'Spread10y',
-#             'Spread15y', 'Spread20y', 'Spread30y']
-# cds_year = [int(x[6:-1]) for x in cds_date]
 
 credit_default_spread = [100, 110, 120, 140, 150, 160, 165]
 cds_rate = [x/10000 for x in credit_default_spread]
