@@ -18,32 +18,9 @@ engine = create_engine('mysql+mysqldb://root:1029@localhost/test', echo=False)
 years_of_spread =['Spread6m', 'Spread1y', 'Spread2y','Spread3y', 'Spread4y', 'Spread5y',
                   'Spread7y', 'Spread10y', 'Spread15y','Spread20y', 'Spread30y']
 
-# data4 = data4[0:30]
-# # data4['Date'] = data4['Date'].map(lambda x: pd.to_datetime(x))
-# data5 = pd.merge(data4, discount, how='left', on='Date')
-# data5.drop(columns=['index', 'Index'], inplace=True)
-# data5[list(range(120))] = data5[list(range(120))] .applymap(lambda x: np.round(x, 3))
-# data5.to_excel(r'C:\Users\严书航\Desktop\test2.xlsx')
 
 data5 = pd.read_sql_table(table_name='zcombine', con=engine)
-data5.drop(columns='index', inplace=True)
-
-# data5 = data5[0:6540]  # 2018
-# data5 = data5[6540:14332]  # 2017
-# data5 = data5[14332:22011]  # 2016
-# data5 = data5[22011:29594]  # 2015
-# data5 = data5[29594:37234]  # 2014
-# data5 = data5[37234:44725]  # 2013
-# data5 = data5[44725:53375]  # 2012
-# data5 = data5[53375:59855]  # 2011
-# data5 = data5[59855:67629]  # 2010
-# data5 = data5[67629:75182]  # 2009
-# data5 = data5[75182:82364]  # 2008
-# data5 = data5[82364:89817]  # 2007
-# data5 = data5[89817:96655]  # 2006
-
-
-
+data5.drop(columns=['index', 'index_y'], inplace=True)
 
 
 def find_hazard(x):
@@ -59,8 +36,6 @@ def find_hazard(x):
         cds_year = [0.5] + [int(x[6:-1]) for x in cds_date[1:]]
     else:
         cds_year = [int(x[6:-1]) for x in cds_date]
-    # print(cds_year)
-
 
     # the survival probability function, input the hazard rate and the time(quarter),
     # it will return the survival probability. It's a recursive function. Time-cost but simple.
@@ -98,7 +73,7 @@ def find_hazard(x):
             return sum
 
         # use fsolve function to solve the hazard rate
-        r = fsolve(func, x0=0, xtol=0.00001, maxfev=1000)
+        r = fsolve(func, x0=0, xtol=0.000001, maxfev=1000)
         lamm[x] = r
 
     hazard_rate = pd.Series(lamm, index=cds_date)
@@ -106,18 +81,17 @@ def find_hazard(x):
 
 
 # every 20 rows input into the mysql
-for n in range(360, len(data5), 20):
+for n in range(20, len(data5), 20):
     data55 = data5[n-20:n]
     # data55.reset_index(inplace=True, drop=True)
     for i, x in data55.iterrows():
         if i == n-20:
-            hazard_table = pd.Series(data=find_hazard(x), index=years_of_spread, dtype='float64')
+            hazard_table = pd.Series(data=find_hazard(x), index=years_of_spread, dtype='float64').round(7)
             continue
-        hazard_r = find_hazard(x)
+        hazard_r = find_hazard(x).round(7)
         hazard_table = pd.concat([hazard_table, hazard_r], axis=1, ignore_index=True)
-        print(i)
 
-
+    print(i)
     data55 = data55[['Date', 'Ticker', 'DocClause', 'Recovery', 'CompositeLevelRecovery']]
 
     h = hazard_table.T
@@ -128,11 +102,7 @@ for n in range(360, len(data5), 20):
     change = dict(zip(years_of_spread, new_name))
     data6.rename(columns=change, inplace=True)
 
-
-    # data6.to_csv(r'C:\Users\严书航\Desktop\hazard.csv')
-
-    data6.to_sql(name='zhazard7', con=engine, if_exists='append')
-# data6.info()
+    data6.to_sql(name='zhazard', con=engine, if_exists='append')
 
 print('Cost ', dt.now() - start)
 
