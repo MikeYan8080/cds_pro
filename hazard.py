@@ -41,7 +41,7 @@ data5.drop(columns='index', inplace=True)
 # data5 = data5[75182:82364]  # 2008
 # data5 = data5[82364:89817]  # 2007
 # data5 = data5[89817:96655]  # 2006
-data5 = data5[0:111]  # 2015-2018 zhazard1
+
 
 
 
@@ -98,36 +98,40 @@ def find_hazard(x):
             return sum
 
         # use fsolve function to solve the hazard rate
-        r = fsolve(func, x0=0, xtol=0.000001)
+        r = fsolve(func, x0=0, xtol=0.00001, maxfev=1000)
         lamm[x] = r
 
     hazard_rate = pd.Series(lamm, index=cds_date)
     return hazard_rate
 
 
-data5.reset_index(inplace=True, drop=True)
-# data5 = data5[0:2]
-for i, x in data5.iterrows():
-    if i == 0:
-        hazard_table = pd.Series(data=find_hazard(x), index=years_of_spread, dtype='float64')
-        continue
-    hazard_r = find_hazard(x)
-    hazard_table = pd.concat([hazard_table, hazard_r], axis=1, ignore_index=True)
-    print(i)
+# every 20 rows input into the mysql
+for n in range(360, len(data5), 20):
+    data55 = data5[n-20:n]
+    # data55.reset_index(inplace=True, drop=True)
+    for i, x in data55.iterrows():
+        if i == n-20:
+            hazard_table = pd.Series(data=find_hazard(x), index=years_of_spread, dtype='float64')
+            continue
+        hazard_r = find_hazard(x)
+        hazard_table = pd.concat([hazard_table, hazard_r], axis=1, ignore_index=True)
+        print(i)
 
 
-data5 = data5[['Date', 'Ticker', 'DocClause', 'Recovery', 'CompositeLevelRecovery']]
+    data55 = data55[['Date', 'Ticker', 'DocClause', 'Recovery', 'CompositeLevelRecovery']]
 
-data6 = pd.concat([data5, hazard_table.T], axis=1)
+    h = hazard_table.T
+    h.set_index(data55.index, inplace=True)
+    data6 = pd.concat([data55, h], axis=1)
 
-new_name = [x.replace('Spread', 'Risk Intensity ') for x in years_of_spread]
-change = dict(zip(years_of_spread, new_name))
-data6.rename(columns=change, inplace=True)
+    new_name = [x.replace('Spread', 'Risk Intensity ') for x in years_of_spread]
+    change = dict(zip(years_of_spread, new_name))
+    data6.rename(columns=change, inplace=True)
 
 
-# data6.to_csv(r'C:\Users\严书航\Desktop\hazard.csv')
+    # data6.to_csv(r'C:\Users\严书航\Desktop\hazard.csv')
 
-data6.to_sql(name='zhazard1', con=engine, if_exists='replace')
+    data6.to_sql(name='zhazard7', con=engine, if_exists='append')
 # data6.info()
 
 print('Cost ', dt.now() - start)
